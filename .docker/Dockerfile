@@ -1,0 +1,13 @@
+FROM python:3.9-alpine
+
+EXPOSE 5000/tcp
+
+WORKDIR /app
+COPY requirements.txt ./
+RUN pip install --no-cache-dir -r requirements.txt
+COPY . .
+
+RUN touch .env
+RUN rm -rf .env
+
+CMD [ "python", "./app.py" ]
