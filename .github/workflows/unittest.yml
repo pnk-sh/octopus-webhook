@@ -6,11 +6,10 @@ on:
 
 jobs:
   unittest:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout
-      uses: actions/checkout@v2
+    - uses: actions/checkout@v2
       run: |
         docker run -d --name testmongo -e 'MONGO_INITDB_ROOT_USERNAME=admin' -e 'MONGO_INITDB_ROOT_PASSWORD=secret' mongo:4.4
         docker build -f .docker/unittest/Dockerfile -t unittest .
