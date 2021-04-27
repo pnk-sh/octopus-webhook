@@ -1,0 +1,17 @@
+name: Verify unittest
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  unittest:
+    runs-on: ubuntu-18.04
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+      run: |
+        docker run -d --name testmongo -e 'MONGO_INITDB_ROOT_USERNAME=admin' -e 'MONGO_INITDB_ROOT_PASSWORD=secret' mongo:4.4
+        docker build -f .docker/unittest/Dockerfile -t unittest .
+        docker run --rm --link testmongo -e 'MONGO_DATABASE=octopus-webhook' -e 'MONGO_HOST=testmongo' -e 'MONGO_PORT=27017' -e 'MONGO_USERNAME=admin' -e 'MONGO_PASSWORD=secret' -e 'MONGO_AUTH_SOURCE=admin' -e 'MONGO_MECHANISM=SCRAM-SHA-1' unittest
