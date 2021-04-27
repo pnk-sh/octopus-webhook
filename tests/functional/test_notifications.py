@@ -6,3 +6,5 @@ def test_notifications_create():
     OdmWebhook.drop_collection()
 
     app = create_app()
+
+    assert True
