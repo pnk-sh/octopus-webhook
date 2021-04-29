@@ -2,7 +2,11 @@ from bson.json_util import default
 from mongoengine import Document
 from mongoengine.fields import DictField, SequenceField, StringField
 
-WEBHOOK_STATUS = ("pending",)
+WEBHOOK_STATUS = (
+    "pending",
+    "processed",
+    "cancel",
+)
 
 
 class Webhook(Document):
