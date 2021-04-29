@@ -32,4 +32,4 @@ jobs:
         MONGO_MECHANISM: SCRAM-SHA-1
       run: |
         docker build -f .docker/unittest/Dockerfile -t unittest .
-        docker run --rm --network-host unittest
+        docker run --rm --network=host unittest
