@@ -33,5 +33,5 @@ jobs:
     - name: Run unittest
       run: |
         docker build -f .docker/unittest/Dockerfile -t unittest .
-        docker run --rm --network=host -e 'MONGO_HOST=mongodb://admin:secret@172.17.0.2:27017/octopus-webhook?authSource=admin' unittest
+        docker run --rm --network=host -e 'MONGO_HOST=mongodb://admin:secret@testmongo:27017/octopus-webhook?authSource=admin' unittest
       #  docker run --rm --network=test -e 'MONGO_HOST=mongodb://admin:secret@testmongo:27017/octopus-webhook?authSource=admin' unittest
