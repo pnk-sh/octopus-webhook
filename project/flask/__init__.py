@@ -7,6 +7,7 @@ from project.middleware.connect import Connect
 from project.middleware.authIdentifier import AuthIdentifier
 
 from project.flask.notifications import Notifications
+from project.flask.identifiers import Identifiers
 
 dotenv.load_dotenv()
 debug_mode = True if os.getenv("DEBUG_MODE") == "1" else False
@@ -28,6 +29,20 @@ def create_app(config_filename=None, instance_relative_config=True):
         f"/webhook",
         view_func=Notifications.webhook,
         endpoint="notifications_webhook",
+        methods=["POST"],
+    )
+
+    app.add_url_rule(
+        f"/identifier",
+        view_func=Identifiers.get_all,
+        endpoint="identifier_get_all",
+        methods=["GET"],
+    )
+
+    app.add_url_rule(
+        f"/identifier",
+        view_func=Identifiers.create,
+        endpoint="identifier_create",
         methods=["POST"],
     )
 

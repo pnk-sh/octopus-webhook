@@ -15,17 +15,27 @@ class AuthIdentifier:
     def __call__(self, environ, start_response):
         request = Request(environ)
 
+        logging.info(request.authorization)
+
         try:
+            if request.authorization:
+                if request.authorization.username == os.getenv(
+                    "BASIC_AUTH_USER"
+                ) and request.authorization.password == os.getenv("BASIC_AUTH_PASS"):
+                    return self.app(environ, start_response)
+                else:
+                    raise AuthNotAllowed()
 
-            args_identifier = request.args.get("identifier")
+            else:
+                args_identifier = request.args.get("identifier")
 
-            try:
-                identifier_data = Identifier.objects.get(key=args_identifier)
-            except Exception:
-                raise AuthNotAllowed()
+                try:
+                    identifier_data = Identifier.objects.get(key=args_identifier)
+                except Exception:
+                    raise AuthNotAllowed()
 
-            logging.info("Auth Identifier success")
-            return self.app(environ, start_response)
+                logging.info("Auth Identifier success")
+                return self.app(environ, start_response)
 
         except AuthNotAllowed as e:
             logging.info("Auth Identifier failed")
