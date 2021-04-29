@@ -8,29 +8,30 @@ jobs:
   unittest:
     runs-on: ubuntu-latest
 
-#    services:
-#      testmongo:
-#        image: mongo:4.4
-#        env:
-#          MONGO_INITDB_ROOT_USERNAME: admin
-#          MONGO_INITDB_ROOT_PASSWORD: secret
-#        ports:
-#          - 27017:27017
+    services:
+      testmongo:
+        image: mongo:4.4
+        env:
+          MONGO_INITDB_ROOT_USERNAME: admin
+          MONGO_INITDB_ROOT_PASSWORD: secret
+        ports:
+          - 27017:27017
 
     steps:
     - name: Checkout
       uses: actions/checkout@v2
 
-    - name: Create network in docker
-      run: |
-        docker network create test
-        docker network ls
-        
-    - name: Spin mongodb up
-      run: |
-        docker run -d --network=test --name testmongo -e 'MONGO_INITDB_ROOT_USERNAME=admin' -e 'MONGO_INITDB_ROOT_PASSWORD=secret' mongo:4.4
+#   - name: Create network in docker
+#     run: |
+#       docker network create test
+#       docker network ls
+#       
+#   - name: Spin mongodb up
+#     run: |
+#       docker run -d --network=test --name testmongo -e 'MONGO_INITDB_ROOT_USERNAME=admin' -e 'MONGO_INITDB_ROOT_PASSWORD=secret' mongo:4.4
       
     - name: Run unittest
       run: |
         docker build -f .docker/unittest/Dockerfile -t unittest .
-        docker run --rm --network=test -e 'MONGO_HOST=mongodb://admin:secret@testmongo:27017/octopus-webhook?authSource=admin' unittest
+        docker run --rm --network=host -e 'MONGO_HOST=mongodb://admin:secret@172.17.0.2:27017/octopus-webhook?authSource=admin' unittest
+      #  docker run --rm --network=test -e 'MONGO_HOST=mongodb://admin:secret@testmongo:27017/octopus-webhook?authSource=admin' unittest
