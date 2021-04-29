@@ -9,7 +9,42 @@ on:
     types: [published]
 
 jobs:
+  unittest:
+    runs-on: ubuntu-latest
+
+    services:
+      testmongo:
+        image: mongo:4.4
+        env:
+          MONGO_INITDB_ROOT_USERNAME: admin
+          MONGO_INITDB_ROOT_PASSWORD: secret
+        ports:
+          - 27017:27017
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Create network in docker
+      run: |
+        docker network create test
+        docker network ls
+        
+    - name: Spin mongodb up
+      run: |
+        docker run -d --network=test --name testmongo -e 'MONGO_INITDB_ROOT_USERNAME=admin' -e 'MONGO_INITDB_ROOT_PASSWORD=secret' mongo:4.4
+        
+    - name: Run unittest
+      run: |
+        docker build -f .docker/unittest/Dockerfile -t unittest .
+        docker run --rm --network=test \
+        -e 'MONGO_HOST=mongodb://admin:secret@testmongo:27017/octopus-webhook?authSource=admin' \
+        -e 'BASIC_AUTH_USER=admin' \
+        -e 'BASIC_AUTH_PASS=secret' \
+        unittest
+
   docker_build_push:
+    needs: unittest
     runs-on: ubuntu-latest
 
     steps:

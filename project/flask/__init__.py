@@ -33,6 +33,13 @@ def create_app(config_filename=None, instance_relative_config=True):
     )
 
     app.add_url_rule(
+        f"/webhook",
+        view_func=Notifications.get_webhook,
+        endpoint="notifications_webhook_get",
+        methods=["GET"],
+    )
+
+    app.add_url_rule(
         f"/identifier",
         view_func=Identifiers.get_all,
         endpoint="identifier_get_all",
