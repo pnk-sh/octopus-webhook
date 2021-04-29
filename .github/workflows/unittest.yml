@@ -29,10 +29,8 @@ jobs:
     - name: Spin mongodb up
       run: |
         docker run -d --network=test --name testmongo -e 'MONGO_INITDB_ROOT_USERNAME=admin' -e 'MONGO_INITDB_ROOT_PASSWORD=secret' mongo:4.4
-
       
-
     - name: Run unittest
       run: |
         docker build -f .docker/unittest/Dockerfile -t unittest .
-        docker run --rm --network=test -e 'MONGO_HOST=mongodb://admin:secret@testmongo:27017/octopus-webhook?authMode=scram-sha1' unittest
+        docker run --rm --network=test -e 'MONGO_HOST=mongodb://admin:secret@testmongo:27017/octopus-webhook?authSource=admin' unittest
