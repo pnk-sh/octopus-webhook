@@ -1,3 +1,5 @@
+import os
+import pika
 from datetime import datetime
 from project.odm.webhook import Webhook as OdmWebhook
 from bson.json_util import dumps, loads
@@ -14,6 +16,26 @@ class Notifications:
         webhook_data.identifier = request.args.get("identifier")
         webhook_data.webhook = data
         webhook_data.save()
+
+        if os.getenv("RABBITMQ_ENABLE") == "1":
+            connection = pika.BlockingConnection(
+                pika.ConnectionParameters(os.getenv("RABBITMQ_HOST"))
+            )
+            channel = connection.channel()
+            channel.queue_declare(queue="webhook")
+            channel.basic_publish(
+                exchange="",
+                routing_key="webhook",
+                body=dumps(
+                    {
+                        "id": str(webhook_data.pk),
+                        "identifier": webhook_data.identifier,
+                        "tag": data["push_data"]["tag"],
+                        "image": data["repository"]["repo_name"],
+                    }
+                ),
+            )
+            connection.close()
 
         return (
             Response(
