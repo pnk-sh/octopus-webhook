@@ -1,14 +1,8 @@
-FROM python:3.9-alpine
+FROM python:3.9
 
 WORKDIR /app
 
-RUN apk update && apk upgrade
-RUN apk add \
-    iproute2
-
-RUN apk add --no-cache --virtual .build-deps gcc musl-dev
-RUN pip install cython
-RUN apk del .build-deps gcc musl-dev
+RUN apt-get update && apt-get install
 
 COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
