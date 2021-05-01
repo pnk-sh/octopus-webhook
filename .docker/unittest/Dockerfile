@@ -4,8 +4,11 @@ WORKDIR /app
 
 RUN apk update && apk upgrade
 RUN apk add \
-    iproute2 \ 
-    gcc
+    iproute2
+
+RUN apk add --no-cache --virtual .build-deps gcc musl-dev
+RUN pip install cython
+RUN apk del .build-deps gcc musl-dev
 
 COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
