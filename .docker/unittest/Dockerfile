@@ -2,7 +2,10 @@ FROM python:3.9-alpine
 
 WORKDIR /app
 
-RUN apk add iproute2
+RUN apk update && apk upgrade
+RUN apk add \
+    iproute2 \ 
+    gcc
 
 COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
