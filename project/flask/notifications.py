@@ -19,7 +19,10 @@ class Notifications:
 
         if os.getenv("RABBITMQ_ENABLE") == "1":
             connection = pika.BlockingConnection(
-                pika.ConnectionParameters(os.getenv("RABBITMQ_HOST"))
+                pika.ConnectionParameters(os.getenv("RABBITMQ_HOST"),
+                int(os.getenv('RABBITMQ_PORT')),
+                os.getenv('RABBITMQ_VHOST'),
+                pika.PlainCredentials(os.getenv('RABBITMQ_USER'), os.getenv('RABBITMQ_PASS')))
             )
             channel = connection.channel()
             channel.queue_declare(queue="webhook")
