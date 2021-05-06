@@ -8,8 +8,8 @@ def insert_logging(summary: str, binds: list, description: str = '', level: str 
         requests.post(os.getenv('API_HOST') +'logging', json={
             'summary': summary,
             'description': description,
-            'created_at': datetime.utcnow().strftime("%m/%d/%Y, %H:%M:%S.%f"),
-            'level': level,
+            'created_at': datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S.%f"),
+            'level': level, 
             'binds': binds
         })
         

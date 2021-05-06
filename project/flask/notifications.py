@@ -71,14 +71,14 @@ class Notifications:
                 )
         else:
             insert_logging(
-            summary='Webhook - AMQP process is disabled',
-            description='Its mean the system will not automatic deploy this webhook out.',
-            binds=[
-                f'webook_id-{str(webhook_data.pk)}',
-                f'webook_number-{webhook_data.number}',
-                f'webook_identifier-{webhook_data.identifier}',
-            ]
-        )
+                summary='Webhook - AMQP process is disabled',
+                description='Its mean the system will not automatic deploy this webhook out.',
+                binds=[
+                    f'webook_id-{str(webhook_data.pk)}',
+                    f'webook_number-{webhook_data.number}',
+                    f'webook_identifier-{webhook_data.identifier}',
+                ]
+            )
         return (
             Response(
                 dumps({"status": 200, "content": {"id": webhook_data.pk}}),
