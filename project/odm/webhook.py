@@ -1,10 +1,12 @@
 from bson.json_util import default
 from mongoengine import Document
-from mongoengine.fields import DictField, SequenceField, StringField
+from mongoengine.fields import DictField, IntField, SequenceField, StringField
 
 WEBHOOK_STATUS = (
     "pending",
-    "processed",
+    "processing",
+    "completed",
+    "error",
     "cancel",
 )
 
@@ -14,5 +16,9 @@ class Webhook(Document):
     status = StringField(choices=WEBHOOK_STATUS, default="pending")
     identifier = StringField()
     webhook = DictField()
+
+    service_update_pending = IntField(default=0)
+    service_update_processed = IntField(default=0)
+    service_update_failed = IntField(default=0)
 
     meta = {"indexes": [{"fields": ["identifier"]}, {"fields": ["status"]}]}

@@ -1,10 +1,9 @@
 import os
+from project.model.logging import insert_logging
 import pika
-from datetime import datetime
 from project.odm.webhook import Webhook as OdmWebhook
 from bson.json_util import dumps, loads
 from flask import Response, request
-from mongoengine import DoesNotExist
 
 
 class Notifications:
@@ -17,29 +16,69 @@ class Notifications:
         webhook_data.webhook = data
         webhook_data.save()
 
-        if os.getenv("RABBITMQ_ENABLE") == "1":
-            connection = pika.BlockingConnection(
-                pika.ConnectionParameters(os.getenv("RABBITMQ_HOST"),
-                int(os.getenv('RABBITMQ_PORT')),
-                os.getenv('RABBITMQ_VHOST'),
-                pika.PlainCredentials(os.getenv('RABBITMQ_USER'), os.getenv('RABBITMQ_PASS')))
-            )
-            channel = connection.channel()
-            channel.queue_declare(queue="webhook")
-            channel.basic_publish(
-                exchange="",
-                routing_key="webhook",
-                body=dumps(
-                    {
-                        "id": str(webhook_data.pk),
-                        "identifier": webhook_data.identifier,
-                        "tag": data["push_data"]["tag"],
-                        "image": data["repository"]["repo_name"],
-                    }
-                ),
-            )
-            connection.close()
+        insert_logging(
+            summary='Webhook - success created',
+            binds=[
+                f'webook_id-{str(webhook_data.pk)}',
+                f'webook_number-{webhook_data.number}',
+                f'webook_identifier-{webhook_data.identifier}',
+            ]
+        )
 
+        if os.getenv("RABBITMQ_ENABLE") == "1":
+            try:
+                connection = pika.BlockingConnection(
+                    pika.ConnectionParameters(os.getenv("RABBITMQ_HOST"),
+                    int(os.getenv('RABBITMQ_PORT')),
+                    os.getenv('RABBITMQ_VHOST'),
+                    pika.PlainCredentials(os.getenv('RABBITMQ_USER'), os.getenv('RABBITMQ_PASS')))
+                )
+                channel = connection.channel()
+                channel.queue_declare(queue="webhook")
+                channel.basic_publish(
+                    exchange="",
+                    routing_key="webhook",
+                    body=dumps(
+                        {
+                            "id": str(webhook_data.pk),
+                            "identifier": webhook_data.identifier,
+                            "tag": data["push_data"]["tag"],
+                            "image": data["repository"]["repo_name"],
+                        }
+                    ),
+                )
+                connection.close()
+
+                insert_logging(
+                    summary='Webhook - Success sending to AMQP server',
+                    description='Its wating for next step in the process chain to be processed to the right Docker Swarm Clusters',
+                    binds=[
+                        f'webook_id-{str(webhook_data.pk)}',
+                        f'webook_number-{webhook_data.number}',
+                        f'webook_identifier-{webhook_data.identifier}',
+                    ]
+                )
+
+            except Exception:
+                insert_logging(
+                    summary='Webhook - Failed to sending it to AMQP server',
+                    level='error',
+                    binds=[
+                        f'webook_id-{str(webhook_data.pk)}',
+                        f'webook_number-{webhook_data.number}',
+                        f'webook_identifier-{webhook_data.identifier}',
+                    ]
+                )
+        else:
+            insert_logging(
+            summary='Webhook - AMQP process is disabled',
+            description='Its mean the system will not automatic deploy this webhook out.',
+            binds=[
+                f'webook_id-{str(webhook_data.pk)}',
+                f'webook_number-{webhook_data.number}',
+                f'webook_identifier-{webhook_data.identifier}',
+            ]
+        )
         return (
             Response(
                 dumps({"status": 200, "content": {"id": webhook_data.pk}}),
