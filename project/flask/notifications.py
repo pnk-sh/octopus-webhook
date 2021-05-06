@@ -1,6 +1,7 @@
 import os
-from project.model.logging import insert_logging
 import pika
+from datetime import datetime
+from project.model.logging import insert_logging
 from project.odm.webhook import Webhook as OdmWebhook
 from bson.json_util import dumps, loads
 from flask import Response, request
@@ -14,6 +15,7 @@ class Notifications:
         webhook_data = OdmWebhook()
         webhook_data.identifier = request.args.get("identifier")
         webhook_data.webhook = data
+        webhook_data.created_at = datetime.utcnow()
         webhook_data.save()
 
         insert_logging(
