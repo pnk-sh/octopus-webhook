@@ -1,5 +1,11 @@
 from mongoengine import Document
-from mongoengine.fields import DateTimeField, DictField, IntField, SequenceField, StringField
+from mongoengine.fields import (
+    DateTimeField,
+    DictField,
+    IntField,
+    SequenceField,
+    StringField,
+)
 
 WEBHOOK_STATUS = (
     "pending",
